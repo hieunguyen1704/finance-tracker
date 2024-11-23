@@ -1,7 +1,11 @@
 # How to migrate DB:
-1. Access to container.
-2. Run command:
-    ```
-    npx prisma migrate dev --name {{your name}}
-    npx prisma generate
-    ```
+Run command:
+```
+    docker-compose exec app npx prisma migrate dev --name {{your name}}
+    docker-compose exec app npx prisma generate
+```
+# How to install new package:
+Run command:
+```
+docker-compose exec app npm install {{package}}
+```

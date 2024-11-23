@@ -12,6 +12,7 @@ model User {
   name          String
   email         String         @unique
   password      String // Hashed password
+  confirmed     Boolean  @default(false)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   transactions  Transaction[]
@@ -26,6 +27,7 @@ model MagicLink {
   userId    Int
   token     String   @unique
   expiresAt DateTime
+  isUsed    Boolean  @default(false) // Indicates if the link has been used
   user      User     @relation(fields: [userId], references: [id])
 }
 

@@ -4,15 +4,23 @@ services:
   app:
     build: .
     volumes:
-      - .:/usr/src/app  # Mount project directory for live code changes
-      - /usr/src/app/node_modules  # Prevent overwriting node_modules in the container
+      - .:/app # Mount project directory for live code changes
+      - /app/node_modules # Prevent overwriting node_modules in the container
     ports:
-      - "3000:3000"  # Map the app's port to the host
+      - '3000:3000' # Map the app's port to the host
     environment:
       DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      MAILTRAP_USER: ${MAILTRAP_USER}
+      MAILTRAP_PASSWORD: ${MAILTRAP_PASSWORD}
+      MAILTRAP_HOST: ${MAILTRAP_HOST}
+      MAILTRAP_PORT: ${MAILTRAP_PORT}
+      EMAIL_FROM: ${EMAIL_FROM}
+      APP_URL: ${APP_URL}
+
     depends_on:
-      - db  # Ensure the database container starts first
-    command: npm run dev  # Enable hot-reloading with nodemon
+      - db # Ensure the database container starts first
+    command: npm run dev # Enable hot-reloading with nodemon
 
   db:
     image: postgres:17
@@ -22,9 +30,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"  # Expose the database port
+      - '5432:5432' # Expose the database port
     volumes:
-      - postgres_data:/var/lib/postgresql/data  # Persist database data
+      - postgres_data:/var/lib/postgresql/data # Persist database data
 
 volumes:
-  postgres_data:  # Named volume for database persistence
+  postgres_data: # Named volume for database persistence
