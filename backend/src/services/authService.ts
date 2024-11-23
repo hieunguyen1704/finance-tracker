@@ -4,6 +4,8 @@ import { generateMagicLink, verifyMagicLink } from './magicLinkService'
 import * as UserModel from '../models/user'
 import { sendEmail } from '../utils/emailService'
 import { JWT_SECRET } from '../config/dotenv'
+import { publishToQueue } from '../utils/queueService'
+import queueNames from '../constants/queue'
 
 const TOKEN_EXPIRATION = '30d' // JWT token expiration for login
 
@@ -35,7 +37,10 @@ export const registerUser = async (
     confirmed: false,
   })
 
-  await sendConfirmationEmail(user.email, user.id)
+  await publishToQueue(queueNames.sendConfirmationEmail, {
+    email: user.email,
+    userId: user.id,
+  })
 
   return { message: 'Registration successful. Please confirm your email.' }
 }
@@ -85,17 +90,25 @@ export const confirmEmailWithMagicLink = async (token: string) => {
     throw new Error('Email already confirmed')
   }
 
-  return await UserModel.updateUser(user.id, { confirmed: true })
+  await UserModel.updateUser(user.id, { confirmed: true })
+
+  const accessToken = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
+    expiresIn: TOKEN_EXPIRATION,
+  })
+
+  const { password: _, ...safeUser } = user
+
+  return { ...safeUser, accessToken }
 }
 
-  /**
-   * Login with email and password.
-   * @param email The email of the user.
-   * @param password The password of the user.
-   * @returns The user object (excluding password) and an access token.
-   * @throws Error if the email or password is invalid.
-   * @throws Error if the email is not confirmed.
-   */
+/**
+ * Login with email and password.
+ * @param email The email of the user.
+ * @param password The password of the user.
+ * @returns The user object (excluding password) and an access token.
+ * @throws Error if the email or password is invalid.
+ * @throws Error if the email is not confirmed.
+ */
 export const loginWithEmail = async (email: string, password: string) => {
   const user = await UserModel.findUserByEmail(email)
 

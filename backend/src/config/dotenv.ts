@@ -9,3 +9,4 @@ export const MAILTRAP_HOST = process.env.MAILTRAP_HOST!
 export const MAILTRAP_PORT = process.env.MAILTRAP_PORT!
 export const EMAIL_FROM = process.env.EMAIL_FROM!
 export const APP_URL = process.env.APP_URL!
+export const RABBITMQ_URL = process.env.RABBITMQ_URL!

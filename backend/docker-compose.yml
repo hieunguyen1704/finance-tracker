@@ -2,10 +2,12 @@ version: '3.8'
 name: finance-tracker
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - .:/app # Mount project directory for live code changes
-      - /app/node_modules # Prevent overwriting node_modules in the container
+      - app_node_modules:/app/node_modules # Prevent overwriting node_modules in the container
     ports:
       - '3000:3000' # Map the app's port to the host
     environment:
@@ -17,10 +19,14 @@ services:
       MAILTRAP_PORT: ${MAILTRAP_PORT}
       EMAIL_FROM: ${EMAIL_FROM}
       APP_URL: ${APP_URL}
+      RABBITMQ_URL: ${RABBITMQ_URL}
 
     depends_on:
-      - db # Ensure the database container starts first
-    command: npm run dev # Enable hot-reloading with nodemon
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    command: npm run dev
 
   db:
     image: postgres:17
@@ -33,6 +39,41 @@ services:
       - '5432:5432' # Expose the database port
     volumes:
       - postgres_data:/var/lib/postgresql/data # Persist database data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 10s
+      retries: 5
+      timeout: 10s
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    volumes:
+      - .:/worker # Mount project directory for live code changes
+      - worker_node_modules:/worker/node_modules # Prevent overwriting node_modules in the container
+    environment:
+      RABBITMQ_URL: ${RABBITMQ_URL}
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    command: npm run worker:dev
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    ports:
+      - '5672:5672' # For application connections
+      - '15672:15672' # For RabbitMQ management dashboard
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+      interval: 10s
+      timeout: 10s
+      retries: 5
 
 volumes:
   postgres_data: # Named volume for database persistence
+  worker_node_modules:
+  app_node_modules:
