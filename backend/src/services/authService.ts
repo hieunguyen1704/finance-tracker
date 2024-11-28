@@ -2,9 +2,9 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { generateMagicLink, verifyMagicLink } from './magicLinkService'
 import * as UserModel from '../models/user'
-import { sendEmail } from '../utils/emailService'
+import { sendEmail } from './shared/emailService'
 import { JWT_SECRET } from '../config/dotenv'
-import { publishToQueue } from '../utils/queueService'
+import { publishToQueue } from './shared/queueService'
 import queueNames from '../constants/queue'
 
 const TOKEN_EXPIRATION = '30d' // JWT token expiration for login

@@ -1,22 +1,40 @@
-// import { Request, Response, NextFunction } from 'express'
-// import jwt from 'jsonwebtoken'
-// import { JWT_SECRET } from '../config/dotenv'
+import { Request, Response, NextFunction } from 'express'
+import jwt from 'jsonwebtoken'
+import { JWT_SECRET } from '../config/dotenv'
+import { errorResponse } from '../utils/errorResponse'
 
-// export const authenticate = (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction,
-// ) => {
-//   const token = req.headers.authorization?.split(' ')[1]
-//   if (!token) {
-//     return res.status(401).json({ error: 'Unauthorized' })
-//   }
+interface RequestWithUser extends Request {
+  user: {
+    id: string
+    email: string
+  }
+}
 
-//   try {
-//     const decoded = jwt.verify(token, JWT_SECRET)
-//     req.user = decoded // Attach user data to the request object
-//     next()
-//   } catch (error) {
-//     return res.status(403).json({ error: 'Invalid token' })
-//   }
-// }
+export const authMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const authHeader = req.headers.authorization
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    res.status(401)
+    errorResponse(res, 401, 'Unauthorized: No token provided')
+    return
+  }
+
+  const token = authHeader.split(' ')[1]
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET)
+    console.log('🚀 ~ decoded:', decoded)
+    if (typeof decoded === 'object' && 'id' in decoded && 'email' in decoded) {
+      req.user = decoded as { id: string; email: string }
+      next()
+    } else {
+      errorResponse(res, 401, 'Unauthorized: Invalid token payload')
+    }
+  } catch (error) {
+    errorResponse(res, 401, 'Unauthorized: Invalid token')
+  }
+}

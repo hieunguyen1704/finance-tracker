@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import * as authService from '../services/authService'
+import { errorResponse } from '../utils/errorResponse'
 
 /**
  * Handles user registration.
@@ -11,7 +12,7 @@ export const register = async (req: Request, res: Response) => {
     const { email, password, name } = req.body
 
     if (!email || !password) {
-      res.status(400).json({ error: 'Email and password are required' })
+      errorResponse(res, 400, 'Email and password are required')
     }
 
     const result = await authService.registerUser(email, password, name)
@@ -19,9 +20,9 @@ export const register = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error)
     if (error instanceof Error) {
-      res.status(400).json({ error: error.message })
+      errorResponse(res, 500, error.message)
     } else {
-      res.status(400).json({ error: 'An unknown error occurred' })
+      errorResponse(res, 500, 'An unknown error occurred')
     }
   }
 }
@@ -36,17 +37,17 @@ export const confirmEmail = async (req: Request, res: Response) => {
     const { token } = req.query
 
     if (!token || typeof token !== 'string') {
-      res.status(400).json({ error: 'Invalid or missing token' })
+      errorResponse(res, 400, 'Invalid or missing token')
     }
 
     const user = await authService.confirmEmailWithMagicLink(token as string)
-    res.status(200).json({ message: 'Email confirmed successfully', user })
+    res.status(200).json({ ...user })
   } catch (error) {
     console.error(error)
     if (error instanceof Error) {
-      res.status(400).json({ error: error.message })
+      errorResponse(res, 500, error.message)
     } else {
-      res.status(400).json({ error: 'An unknown error occurred' })
+      errorResponse(res, 500, 'An unknown error occurred')
     }
   }
 }
@@ -61,7 +62,7 @@ export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body
 
     if (!email || !password) {
-      res.status(400).json({ error: 'Email and password are required' })
+      errorResponse(res, 400, 'Email and password are required')
     }
 
     const result = await authService.loginWithEmail(email, password)
@@ -69,9 +70,9 @@ export const login = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error)
     if (error instanceof Error) {
-      res.status(400).json({ error: error.message })
+      errorResponse(res, 500, error.message)
     } else {
-      res.status(400).json({ error: 'An unknown error occurred' })
+      errorResponse(res, 500, 'An unknown error occurred')
     }
   }
 }
@@ -86,7 +87,7 @@ export const resendConfirmationEmail = async (req: Request, res: Response) => {
     const { email } = req.body
 
     if (!email) {
-      res.status(400).json({ error: 'Email is required' })
+      errorResponse(res, 400, 'Email is required')
     }
 
     const result = await authService.resendConfirmationEmail(email)
@@ -94,9 +95,9 @@ export const resendConfirmationEmail = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error)
     if (error instanceof Error) {
-      res.status(400).json({ error: error.message })
+      errorResponse(res, 500, error.message)
     } else {
-      res.status(400).json({ error: 'An unknown error occurred' })
+      errorResponse(res, 500, 'An unknown error occurred')
     }
   }
 }

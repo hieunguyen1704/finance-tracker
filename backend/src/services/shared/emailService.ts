@@ -6,7 +6,7 @@ import {
   MAILTRAP_PASSWORD,
   MAILTRAP_PORT,
   MAILTRAP_USER,
-} from '../config/dotenv'
+} from '../../config/dotenv'
 
 dotenv.config()
 
