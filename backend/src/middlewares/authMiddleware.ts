@@ -3,13 +3,6 @@ import jwt from 'jsonwebtoken'
 import { JWT_SECRET } from '../config/dotenv'
 import { errorResponse } from '../utils/errorResponse'
 
-interface RequestWithUser extends Request {
-  user: {
-    id: string
-    email: string
-  }
-}
-
 export const authMiddleware = (
   req: Request,
   res: Response,
@@ -27,9 +20,8 @@ export const authMiddleware = (
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET)
-    console.log('🚀 ~ decoded:', decoded)
     if (typeof decoded === 'object' && 'id' in decoded && 'email' in decoded) {
-      req.user = decoded as { id: string; email: string }
+      req.user = decoded as { id: number; email: string }
       next()
     } else {
       errorResponse(res, 401, 'Unauthorized: Invalid token payload')

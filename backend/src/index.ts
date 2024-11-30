@@ -1,13 +1,15 @@
 import express from 'express'
 import authRoutes from './routes/authRoutes'
 import categoryRoutes from './routes/categoryRoutes'
+import transactionRoutes from './routes/transactionRoutes'
 
 const app = express()
 
 app.use(express.json())
 
 app.use('/api/auth', authRoutes)
-app.use('/api/categories', categoryRoutes)
+app.use('/api/category', categoryRoutes)
+app.use('/api/transaction', transactionRoutes)
 
 app.get('/', async (req, res) => {
   res.json({
