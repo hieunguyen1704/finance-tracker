@@ -1,16 +1,30 @@
 import { Router } from 'express'
 import { authMiddleware } from '../middlewares/authMiddleware'
-import { trackTransactionController } from '../controllers/transactionController'
+import {
+  getTransactionsController,
+  trackTransactionController,
+} from '../controllers/transactionController'
 import validateRequestBody from '../middlewares/validationRequestBody'
-import { trackTransactionDto } from '../dtos/transactionDtos'
+import {
+  trackTransactionDto,
+  transactionsParamsDto,
+} from '../dtos/transactionDtos'
+import validateRequestQuery from '../middlewares/validationRequestQuery'
 
 const router = Router()
 
 router.post(
-  '/track',
+  '/',
   authMiddleware,
   validateRequestBody(trackTransactionDto),
   trackTransactionController,
+)
+
+router.get(
+  '/',
+  authMiddleware,
+  validateRequestQuery(transactionsParamsDto),
+  getTransactionsController,
 )
 
 export default router

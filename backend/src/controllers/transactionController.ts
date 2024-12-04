@@ -1,5 +1,8 @@
 import { Request, Response } from 'express'
-import { trackTransactionService } from '../services/transactionService'
+import {
+  listTransactions,
+  trackTransactionService,
+} from '../services/transactionService'
 import { errorResponse } from '../utils/errorResponse'
 
 export const trackTransactionController = async (
@@ -26,7 +29,37 @@ export const trackTransactionController = async (
 
     res.status(201).json(transaction)
   } catch (error) {
-    console.error(error)
+    console.error('Error tracking transaction:', error)
+    if (error instanceof Error) {
+      errorResponse(res, 500, error.message)
+    } else {
+      errorResponse(res, 500, 'An unknown error occurred')
+    }
+  }
+}
+
+export const getTransactionsController = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const userId = req.user?.id // Assume `user` is injected via auth middleware
+
+    if (!userId) {
+      errorResponse(res, 401, 'Unauthorized: User not found')
+    }
+
+    const transactions = await listTransactions({
+      userId: Number(userId),
+      ...req.query, // Query params are already validated and sanitized by the middleware
+      categoryId: req.query.categoryId
+        ? Number(req.query.categoryId)
+        : undefined,
+    })
+
+    res.status(200).json(transactions)
+  } catch (error) {
+    console.error('Error fetching transactions:', error)
     if (error instanceof Error) {
       errorResponse(res, 500, error.message)
     } else {

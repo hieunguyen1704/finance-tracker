@@ -8,6 +8,15 @@ export interface CreateTransactionInput {
   trackedTime: Date
 }
 
+interface GetTransactionsInput {
+  userId: number
+  startTrackedTime?: Date
+  endTrackedTime?: Date
+  categoryId?: number
+  sortBy?: 'amount' | 'trackedTime'
+  sortOrder?: 'asc' | 'desc'
+}
+
 /**
  * Function to create a new transaction
  * @param data - Input data to create a transaction
@@ -32,4 +41,40 @@ export const createTransaction = async (data: CreateTransactionInput) => {
     console.error('Error creating transaction:', error)
     throw new Error('Failed to create transaction')
   }
+}
+
+export const getTransactions = async (params: GetTransactionsInput) => {
+  const {
+    userId,
+    startTrackedTime,
+    endTrackedTime,
+    categoryId,
+    sortBy = 'trackedTime',
+    sortOrder = 'desc',
+  } = params
+
+  const filters: any = {
+    userId,
+  }
+
+  if (categoryId) {
+    filters.categoryId = categoryId
+  }
+
+  if (startTrackedTime || endTrackedTime) {
+    filters.trackedTime = {
+      ...(startTrackedTime ? { gte: startTrackedTime } : {}),
+      ...(endTrackedTime ? { lte: endTrackedTime } : {}),
+    }
+  }
+
+  return prisma.transaction.findMany({
+    include: {
+      category: true,
+    },
+    where: filters,
+    orderBy: {
+      [sortBy]: sortOrder,
+    },
+  })
 }
