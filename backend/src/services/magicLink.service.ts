@@ -3,7 +3,7 @@ import {
   findMagicLinkByToken,
   markMagicLinkAsUsed,
   deleteExpiredLinks,
-} from '../models/magicLink'
+} from '../models/magicLink.model'
 import crypto from 'crypto'
 
 /**

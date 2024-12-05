@@ -1,7 +1,7 @@
 import express from 'express'
-import authRoutes from './routes/authRoutes'
-import categoryRoutes from './routes/categoryRoutes'
-import transactionRoutes from './routes/transactionRoutes'
+import authRoutes from './routes/auth.routes'
+import categoryRoutes from './routes/category.routes'
+import transactionRoutes from './routes/transaction.routes'
 
 const app = express()
 

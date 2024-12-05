@@ -1,4 +1,4 @@
-import { sendConfirmationEmail } from '../services/authService'
+import { sendConfirmationEmail } from '../services/auth.service'
 
 export interface SendConfirmationEmailMessage {
   email: string

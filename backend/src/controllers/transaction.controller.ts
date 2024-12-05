@@ -4,7 +4,7 @@ import {
   listTransactions,
   trackTransactionService,
   updateTransactionService,
-} from '../services/transactionService'
+} from '../services/transaction.service'
 import { errorResponse } from '../utils/errorResponse'
 
 export const trackTransactionController = async (

@@ -1,7 +1,7 @@
 import amqplib from 'amqplib'
 
 import { RABBITMQ_URL } from './config/dotenv'
-import { processSendConfirmationEmail } from './handlers/sendEmailConfirmationHandler'
+import { processSendConfirmationEmail } from './handlers/sendEmailConfirmation.handler'
 import queueNames from './constants/queue'
 
 const startWorker = async () => {

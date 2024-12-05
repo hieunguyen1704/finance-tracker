@@ -1,17 +1,17 @@
 import { Router } from 'express'
-import { authMiddleware } from '../middlewares/authMiddleware'
+import { authMiddleware } from '../middlewares/auth.middleware'
 import {
   deleteTransactionController,
   getTransactionsController,
   trackTransactionController,
   updateTransactionController,
-} from '../controllers/transactionController'
-import validateRequestBody from '../middlewares/validationRequestBody'
+} from '../controllers/transaction.controller'
+import validateRequestBody from '../middlewares/validationRequestBody.middleware'
 import {
   trackTransactionSchema,
   transactionsParamsSchema,
-} from '../validationSchemas/transactionSchema'
-import validateRequestQuery from '../middlewares/validationRequestQuery'
+} from '../validationSchemas/transaction.schema'
+import validateRequestQuery from '../middlewares/validationRequestQuery.middleware'
 
 const router = Router()
 

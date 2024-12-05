@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { getCategories } from '../services/categoryService'
+import { getCategories } from '../services/category.service'
 import { errorResponse } from '../utils/errorResponse'
 
 export const getAllCategories = async (req: Request, res: Response) => {

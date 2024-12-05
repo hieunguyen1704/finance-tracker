@@ -3,13 +3,12 @@ import {
   TransactionQueryParams,
   UpdateTransactionPayload,
 } from '../dtos/transaction.dto'
-import { getCategoryById } from '../models/category'
 import {
   createTransaction,
   deleteTransaction,
   getTransactions,
   updateTransaction,
-} from '../models/transaction'
+} from '../models/transaction.model'
 
 export const trackTransactionService = async (
   data: CreateTransactionPayload,
