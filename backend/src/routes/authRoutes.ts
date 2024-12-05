@@ -1,16 +1,16 @@
 import { Router } from 'express'
 import * as AuthController from '../controllers/authController'
 import validateRequestBody from '../middlewares/validationRequestBody'
-import { loginDto, registerDto } from '../dtos/authDtos'
+import { loginSchema, registerSchema } from '../validationSchemas/authSchema'
 
 const router = Router()
 
 router.post(
   '/register',
-  validateRequestBody(registerDto),
+  validateRequestBody(registerSchema),
   AuthController.register,
 )
-router.post('/login', validateRequestBody(loginDto), AuthController.login)
+router.post('/login', validateRequestBody(loginSchema), AuthController.login)
 router.get('/confirm-email', AuthController.confirmEmail)
 
 export default router

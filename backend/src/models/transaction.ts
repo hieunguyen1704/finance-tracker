@@ -1,21 +1,9 @@
 import prisma from '../config/database'
-
-export interface CreateTransactionInput {
-  userId: number
-  categoryId: number
-  amount: number
-  description?: string
-  trackedTime: Date
-}
-
-interface GetTransactionsInput {
-  userId: number
-  startTrackedTime?: Date
-  endTrackedTime?: Date
-  categoryId?: number
-  sortBy?: 'amount' | 'trackedTime'
-  sortOrder?: 'asc' | 'desc'
-}
+import {
+  CreateTransactionInput,
+  GetTransactionsInput,
+  UpdateTransactionInput,
+} from '../dtos/transaction.dto'
 
 /**
  * Function to create a new transaction
@@ -25,22 +13,17 @@ interface GetTransactionsInput {
 export const createTransaction = async (data: CreateTransactionInput) => {
   const { userId, categoryId, amount, description, trackedTime } = data
 
-  try {
-    const transaction = await prisma.transaction.create({
-      data: {
-        userId,
-        categoryId,
-        amount,
-        description,
-        trackedTime,
-      },
-    })
+  const transaction = await prisma.transaction.create({
+    data: {
+      userId,
+      categoryId,
+      amount,
+      description,
+      trackedTime,
+    },
+  })
 
-    return transaction
-  } catch (error) {
-    console.error('Error creating transaction:', error)
-    throw new Error('Failed to create transaction')
-  }
+  return transaction
 }
 
 export const getTransactions = async (params: GetTransactionsInput) => {
@@ -75,6 +58,30 @@ export const getTransactions = async (params: GetTransactionsInput) => {
     where: filters,
     orderBy: {
       [sortBy]: sortOrder,
+    },
+  })
+}
+
+export const updateTransaction = async (params: UpdateTransactionInput) => {
+  const { transactionId, userId, ...updateData } = params
+
+  return prisma.transaction.update({
+    where: {
+      id: transactionId,
+      userId, // Ensure the transaction belongs to the user
+    },
+    data: updateData,
+  })
+}
+
+export const deleteTransaction = async (
+  transactionId: number,
+  userId: number,
+) => {
+  return prisma.transaction.delete({
+    where: {
+      id: transactionId,
+      userId, // Ensure the transaction belongs to the user
     },
   })
 }

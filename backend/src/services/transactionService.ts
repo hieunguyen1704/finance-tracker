@@ -1,25 +1,24 @@
+import {
+  CreateTransactionPayload,
+  TransactionQueryParams,
+  UpdateTransactionPayload,
+} from '../dtos/transaction.dto'
 import { getCategoryById } from '../models/category'
 import {
   createTransaction,
-  CreateTransactionInput,
+  deleteTransaction,
   getTransactions,
+  updateTransaction,
 } from '../models/transaction'
 
-interface TransactionQueryParams {
-  userId: number
-  startTrackedTime?: string
-  endTrackedTime?: string
-  categoryId?: number
-  sortBy?: 'amount' | 'trackedTime'
-  sortOrder?: 'asc' | 'desc'
-}
-
-export const trackTransactionService = async (data: CreateTransactionInput) => {
-  const category = await getCategoryById(data.categoryId)
-  if (!category) {
-    throw new Error('Category not found')
-  }
-  return createTransaction(data)
+export const trackTransactionService = async (
+  data: CreateTransactionPayload,
+) => {
+  const result = await createTransaction({
+    ...data,
+    trackedTime: new Date(data.trackedTime),
+  })
+  return result
 }
 
 export const listTransactions = async (params: TransactionQueryParams) => {
@@ -57,4 +56,22 @@ export const listTransactions = async (params: TransactionQueryParams) => {
     startTrackedTime: startTrackedTimeDate,
     endTrackedTime: endTrackedTimeDate,
   })
+}
+
+export const updateTransactionService = async (
+  params: UpdateTransactionPayload,
+) => {
+  const result = await updateTransaction({
+    ...params,
+    trackedTime: params.trackedTime ? new Date(params.trackedTime) : undefined,
+  })
+  return result
+}
+
+export const deleteTransactionService = async (
+  transactionId: number,
+  userId: number,
+) => {
+  const result = await deleteTransaction(transactionId, userId)
+  return result
 }

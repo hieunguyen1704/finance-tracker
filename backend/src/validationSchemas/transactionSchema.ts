@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const trackTransactionDto = z.object({
+export const trackTransactionSchema = z.object({
   categoryId: z.number().positive(),
   amount: z.number().positive(),
   description: z.string().optional(),
@@ -9,7 +9,7 @@ export const trackTransactionDto = z.object({
   }),
 })
 
-export const transactionsParamsDto = z.object({
+export const transactionsParamsSchema = z.object({
   startTrackedTime: z.string().optional(),
   endTrackedTime: z.string().optional(),
   categoryId: z
