@@ -3,6 +3,7 @@ import { authMiddleware } from '../middlewares/auth.middleware'
 import {
   deleteTransactionController,
   getMetricsController,
+  getMonthlySpendingController,
   getTransactionsController,
   trackTransactionController,
   updateTransactionController,
@@ -36,6 +37,13 @@ router.get(
   authMiddleware,
   validateRequestQuery(transactionsMetricSchema),
   getMetricsController,
+)
+
+router.get(
+  '/spending-trend',
+  authMiddleware,
+  validateRequestQuery(transactionsMetricSchema),
+  getMonthlySpendingController,
 )
 
 router.put(

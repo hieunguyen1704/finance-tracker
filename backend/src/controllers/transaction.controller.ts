@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import {
   deleteTransactionService,
   getMetrics,
+  getMonthlySpendingService,
   listTransactions,
   trackTransactionService,
   updateTransactionService,
@@ -131,6 +132,7 @@ export const getMetricsController = async (req: Request, res: Response) => {
 
     if (!userId) {
       errorResponse(res, 401, 'Unauthorized: User not found')
+      return
     }
 
     const metrics = await getMetrics({
@@ -141,6 +143,35 @@ export const getMetricsController = async (req: Request, res: Response) => {
     res.status(200).json(metrics)
   } catch (error) {
     console.error('Error fetching metrics:', error)
+    if (error instanceof Error) {
+      errorResponse(res, 500, error.message)
+    } else {
+      errorResponse(res, 500, 'An unknown error occurred')
+    }
+  }
+}
+
+export const getMonthlySpendingController = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const userId = req.user?.id
+
+    if (!userId) {
+      errorResponse(res, 401, 'Unauthorized: User not found')
+      return
+    }
+
+    // Call the service to fetch spending data
+    const data = await getMonthlySpendingService({
+      userId: Number(userId),
+      ...req.query,
+    })
+
+    res.status(200).json({ success: true, data })
+  } catch (error) {
+    console.error('Error fetching spending data:', error)
     if (error instanceof Error) {
       errorResponse(res, 500, error.message)
     } else {

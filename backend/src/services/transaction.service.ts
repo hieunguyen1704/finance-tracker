@@ -5,9 +5,11 @@ import {
   UpdateTransactionPayload,
 } from '../dtos/transaction.dto'
 import {
-  calculateMetrics,
   createTransaction,
   deleteTransaction,
+  findAllTransactions,
+  findAllTransactionsByDate,
+  findSpendingByDate,
   getTransactions,
   updateTransaction,
 } from '../models/transaction.model'
@@ -88,10 +90,101 @@ export const getMetrics = async ({
 }: MetricsRequest) => {
   const parsedStartDate = startDate ? new Date(startDate) : undefined
   const parsedEndDate = endDate ? new Date(endDate) : undefined
-
-  return await calculateMetrics({
+  const allTransactions = await findAllTransactions(userId)
+  const filteredTransactions = await findAllTransactionsByDate({
     userId,
     startDate: parsedStartDate,
     endDate: parsedEndDate,
   })
+
+  let totalEarning = 0
+  let totalSpending = 0
+  let totalBalance = 0
+
+  // Calculate Total Balance from all transactions
+  allTransactions.forEach((transaction) => {
+    const { amount, category } = transaction
+
+    if (category.type === 'income') {
+      totalBalance += amount
+    } else if (category.type === 'expense') {
+      totalBalance -= amount
+    }
+  })
+
+  // Calculate Spending/Earning and Monthly Metrics from filtered transactions
+  const monthlyData: Record<string, { income: number; expense: number }> = {}
+
+  filteredTransactions.forEach((transaction) => {
+    const { amount, trackedTime, category } = transaction
+
+    // Determine transaction type for filtered data
+    if (category.type === 'income') {
+      totalEarning += amount
+    } else if (category.type === 'expense') {
+      totalSpending += amount
+    }
+
+    // Group by month for monthly calculations
+    const monthKey = `${trackedTime.getFullYear()}-${trackedTime.getMonth()}`
+    if (!monthlyData[monthKey]) {
+      monthlyData[monthKey] = { income: 0, expense: 0 }
+    }
+
+    if (category.type === 'income') {
+      monthlyData[monthKey].income += amount
+    } else if (category.type === 'expense') {
+      monthlyData[monthKey].expense += amount
+    }
+  })
+
+  // Calculate Monthly Spending and Savings
+  const monthlyTotals = Object.values(monthlyData)
+  const totalMonths = monthlyTotals.length || 1
+
+  const averageMonthlySpending =
+    monthlyTotals.reduce((sum, month) => sum + month.expense, 0) / totalMonths
+  const averageMonthlySavings =
+    monthlyTotals.reduce(
+      (sum, month) => sum + (month.income - month.expense),
+      0,
+    ) / totalMonths
+
+  return {
+    totalBalance,
+    monthlySpending: averageMonthlySpending,
+    monthlySavings: averageMonthlySavings,
+    totalSpending,
+    totalEarning,
+  }
+}
+
+export const getMonthlySpendingService = async ({
+  userId,
+  startDate,
+  endDate,
+}: MetricsRequest) => {
+  const parsedStartDate = startDate ? new Date(startDate) : undefined
+  const parsedEndDate = endDate ? new Date(endDate) : undefined
+
+  const spendingByDate = await findSpendingByDate(
+    userId,
+    parsedStartDate,
+    parsedEndDate,
+  )
+  // Post-process to group by month
+  const groupedByMonth = spendingByDate.reduce(
+    (acc: { [key: string]: number }, { trackedTime, _sum }) => {
+      const month = trackedTime.toISOString().slice(0, 7) // Extract "YYYY-MM" from the date
+      if (!acc[month]) acc[month] = 0
+      acc[month] += _sum.amount || 0
+      return acc
+    },
+    {},
+  )
+
+  // Convert to an array format suitable for the frontend
+  return Object.entries(groupedByMonth)
+    .map(([month, totalSpending]) => ({ month, totalSpending }))
+    .sort((a, b) => a.month.localeCompare(b.month))
 }

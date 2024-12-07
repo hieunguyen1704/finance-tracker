@@ -105,18 +105,41 @@ export const getTransactionById = async (id: number) => {
   })
 }
 
-export const calculateMetrics = async ({
+export const findAllTransactions = async (userId: number) => {
+  return await prisma.transaction.findMany({
+    where: { userId },
+    include: { category: true },
+  })
+}
+
+export const findAllTransactionsByDate = async ({
   userId,
   startDate,
   endDate,
 }: MetricsInput) => {
-  // Fetch all transactions for balance (ignore time filter)
-  const allTransactions = await prisma.transaction.findMany({
-    where: { userId },
+  const timeFilter =
+    startDate || endDate
+      ? {
+          trackedTime: {
+            ...(startDate ? { gte: startDate } : {}),
+            ...(endDate ? { lte: endDate } : {}),
+          },
+        }
+      : {}
+  return await prisma.transaction.findMany({
+    where: {
+      userId,
+      ...timeFilter,
+    },
     include: { category: true },
   })
+}
 
-  // Fetch transactions with time filters for spending/earning calculations
+export const findSpendingByDate = async (
+  userId: number,
+  startDate?: Date,
+  endDate?: Date,
+) => {
   const timeFilter =
     startDate || endDate
       ? {
@@ -127,72 +150,19 @@ export const calculateMetrics = async ({
         }
       : {}
 
-  const filteredTransactions = await prisma.transaction.findMany({
+  const transactions = await prisma.transaction.groupBy({
+    by: ['trackedTime'], // Group by individual dates
     where: {
+      category: {
+        type: 'expense',
+      },
       userId,
       ...timeFilter,
     },
-    include: { category: true },
+    _sum: {
+      amount: true,
+    },
   })
 
-  let totalEarning = 0
-  let totalSpending = 0
-  let totalBalance = 0
-
-  // Calculate Total Balance from all transactions
-  allTransactions.forEach((transaction) => {
-    const { amount, category } = transaction
-
-    if (category.type === 'income') {
-      totalBalance += amount
-    } else if (category.type === 'expense') {
-      totalBalance -= amount
-    }
-  })
-
-  // Calculate Spending/Earning and Monthly Metrics from filtered transactions
-  const monthlyData: Record<string, { income: number; expense: number }> = {}
-
-  filteredTransactions.forEach((transaction) => {
-    const { amount, trackedTime, category } = transaction
-
-    // Determine transaction type for filtered data
-    if (category.type === 'income') {
-      totalEarning += amount
-    } else if (category.type === 'expense') {
-      totalSpending += amount
-    }
-
-    // Group by month for monthly calculations
-    const monthKey = `${trackedTime.getFullYear()}-${trackedTime.getMonth()}`
-    if (!monthlyData[monthKey]) {
-      monthlyData[monthKey] = { income: 0, expense: 0 }
-    }
-
-    if (category.type === 'income') {
-      monthlyData[monthKey].income += amount
-    } else if (category.type === 'expense') {
-      monthlyData[monthKey].expense += amount
-    }
-  })
-
-  // Calculate Monthly Spending and Savings
-  const monthlyTotals = Object.values(monthlyData)
-  const totalMonths = monthlyTotals.length || 1
-
-  const averageMonthlySpending =
-    monthlyTotals.reduce((sum, month) => sum + month.expense, 0) / totalMonths
-  const averageMonthlySavings =
-    monthlyTotals.reduce(
-      (sum, month) => sum + (month.income - month.expense),
-      0,
-    ) / totalMonths
-
-  return {
-    totalBalance,
-    monthlySpending: averageMonthlySpending,
-    monthlySavings: averageMonthlySavings,
-    totalSpending,
-    totalEarning,
-  }
+  return transactions
 }
