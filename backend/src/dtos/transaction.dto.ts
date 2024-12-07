@@ -5,6 +5,7 @@ export interface TransactionQueryParams {
   categoryId?: number
   sortBy?: 'amount' | 'trackedTime'
   sortOrder?: 'asc' | 'desc'
+  categoryType?: 'income' | 'expense'
 }
 
 export interface CreateTransactionInput {
@@ -30,6 +31,7 @@ export interface GetTransactionsInput {
   categoryId?: number
   sortBy?: 'amount' | 'trackedTime'
   sortOrder?: 'asc' | 'desc'
+  categoryType?: 'income' | 'expense'
 }
 
 export interface UpdateTransactionInput {
@@ -48,4 +50,16 @@ export interface UpdateTransactionPayload {
   trackedTime?: string
   categoryId?: number
   description?: string
+}
+
+export interface MetricsRequest {
+  userId: number
+  startDate?: string
+  endDate?: string
+}
+
+export interface MetricsInput {
+  userId: number
+  startDate?: Date
+  endDate?: Date
 }

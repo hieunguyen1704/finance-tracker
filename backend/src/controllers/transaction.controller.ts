@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import {
   deleteTransactionService,
+  getMetrics,
   listTransactions,
   trackTransactionService,
   updateTransactionService,
@@ -116,6 +117,30 @@ export const deleteTransactionController = async (
     res.status(200).json({ message: 'Transaction deleted successfully' })
   } catch (error: any) {
     console.error('Error deleting transaction:', error)
+    if (error instanceof Error) {
+      errorResponse(res, 500, error.message)
+    } else {
+      errorResponse(res, 500, 'An unknown error occurred')
+    }
+  }
+}
+
+export const getMetricsController = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id
+
+    if (!userId) {
+      errorResponse(res, 401, 'Unauthorized: User not found')
+    }
+
+    const metrics = await getMetrics({
+      userId: Number(userId),
+      ...req.query,
+    })
+
+    res.status(200).json(metrics)
+  } catch (error) {
+    console.error('Error fetching metrics:', error)
     if (error instanceof Error) {
       errorResponse(res, 500, error.message)
     } else {

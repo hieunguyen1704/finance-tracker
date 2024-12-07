@@ -1,9 +1,11 @@
 import {
   CreateTransactionPayload,
+  MetricsRequest,
   TransactionQueryParams,
   UpdateTransactionPayload,
 } from '../dtos/transaction.dto'
 import {
+  calculateMetrics,
   createTransaction,
   deleteTransaction,
   getTransactions,
@@ -28,6 +30,7 @@ export const listTransactions = async (params: TransactionQueryParams) => {
     categoryId,
     sortBy,
     sortOrder,
+    categoryType,
   } = params
 
   let startTrackedTimeDate: Date | undefined
@@ -54,15 +57,18 @@ export const listTransactions = async (params: TransactionQueryParams) => {
     sortOrder,
     startTrackedTime: startTrackedTimeDate,
     endTrackedTime: endTrackedTimeDate,
+    categoryType,
   })
 }
 
 export const updateTransactionService = async (
-  params: UpdateTransactionPayload,
+  payload: UpdateTransactionPayload,
 ) => {
   const result = await updateTransaction({
-    ...params,
-    trackedTime: params.trackedTime ? new Date(params.trackedTime) : undefined,
+    ...payload,
+    trackedTime: payload.trackedTime
+      ? new Date(payload.trackedTime)
+      : undefined,
   })
   return result
 }
@@ -73,4 +79,19 @@ export const deleteTransactionService = async (
 ) => {
   const result = await deleteTransaction(transactionId, userId)
   return result
+}
+
+export const getMetrics = async ({
+  userId,
+  startDate,
+  endDate,
+}: MetricsRequest) => {
+  const parsedStartDate = startDate ? new Date(startDate) : undefined
+  const parsedEndDate = endDate ? new Date(endDate) : undefined
+
+  return await calculateMetrics({
+    userId,
+    startDate: parsedStartDate,
+    endDate: parsedEndDate,
+  })
 }

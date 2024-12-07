@@ -20,4 +20,20 @@ export const transactionsParamsSchema = z.object({
     .optional(),
   sortBy: z.enum(['amount', 'trackedTime']).optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),
+  categoryType: z.enum(['income', 'expense']).optional(),
+})
+
+export const transactionsMetricSchema = z.object({
+  startDate: z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), {
+      message: 'Invalid date format for trackedTime',
+    })
+    .optional(),
+  endDate: z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), {
+      message: 'Invalid date format for trackedTime',
+    })
+    .optional(),
 })

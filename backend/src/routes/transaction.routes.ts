@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { authMiddleware } from '../middlewares/auth.middleware'
 import {
   deleteTransactionController,
+  getMetricsController,
   getTransactionsController,
   trackTransactionController,
   updateTransactionController,
@@ -9,6 +10,7 @@ import {
 import validateRequestBody from '../middlewares/validationRequestBody.middleware'
 import {
   trackTransactionSchema,
+  transactionsMetricSchema,
   transactionsParamsSchema,
 } from '../validationSchemas/transaction.schema'
 import validateRequestQuery from '../middlewares/validationRequestQuery.middleware'
@@ -27,6 +29,13 @@ router.get(
   authMiddleware,
   validateRequestQuery(transactionsParamsSchema),
   getTransactionsController,
+)
+
+router.get(
+  '/metrics',
+  authMiddleware,
+  validateRequestQuery(transactionsMetricSchema),
+  getMetricsController,
 )
 
 router.put(
