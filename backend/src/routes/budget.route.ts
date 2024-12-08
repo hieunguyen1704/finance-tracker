@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { authMiddleware } from '../middlewares/auth.middleware'
 import validateRequestBody from '../middlewares/validationRequestBody.middleware'
 import {
+  budgetParamsSchema,
   createBudgetSchema,
   updateBudgetSchema,
 } from '../validationSchemas/budget.schema'
@@ -11,6 +12,7 @@ import {
   getBudgetsController,
   updateBudgetController,
 } from '../controllers/budget.controller'
+import validateRequestQuery from '../middlewares/validationRequestQuery.middleware'
 
 const router = Router()
 
@@ -21,7 +23,12 @@ router.post(
   createBudgetController,
 )
 
-router.get('/', authMiddleware, getBudgetsController)
+router.get(
+  '/',
+  authMiddleware,
+  validateRequestQuery(budgetParamsSchema),
+  getBudgetsController,
+)
 
 router.put(
   '/:budgetId',

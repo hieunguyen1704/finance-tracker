@@ -1,5 +1,9 @@
 import prisma from '../config/database'
-import { CreateBudgetInput, UpdateBudgetInput } from '../dtos/budget.dto'
+import {
+  BudgetsFilter,
+  CreateBudgetInput,
+  UpdateBudgetInput,
+} from '../dtos/budget.dto'
 import { Transaction } from '@prisma/client'
 
 export const createBudget = async (data: CreateBudgetInput) => {
@@ -8,15 +12,40 @@ export const createBudget = async (data: CreateBudgetInput) => {
   })
 }
 
-export const findAllBudgets = async (userId: number) => {
+export const findAllBudgets = async (
+  userId: number,
+  filters: BudgetsFilter,
+) => {
   const today = new Date()
-  return prisma.budget.findMany({
+
+  const { startDate, endDate } = filters
+
+  let dateFilters = {}
+
+  if (!startDate && !endDate) {
+    dateFilters = {
+      endDate: { gte: today },
+    }
+  } else {
+    dateFilters = {
+      startDate: startDate ? { gte: startDate } : {},
+      endDate: endDate ? { lte: endDate } : {},
+    }
+  }
+  console.log('dateFilters', dateFilters)
+
+  return await prisma.budget.findMany({
     where: {
       userId,
-      endDate: { gt: today }, // gt means greater than
+      ...dateFilters,
     },
     include: {
-      category: true, // Include category details for clarity
+      category: true,
+      budgetUsages: {
+        select: {
+          spent: true,
+        },
+      },
     },
     orderBy: {
       endDate: 'asc',

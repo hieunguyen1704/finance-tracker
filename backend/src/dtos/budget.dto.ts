@@ -15,3 +15,13 @@ export interface CreateBudgetPayload
 export interface UpdateBudgetInput extends Partial<CreateBudgetInput> {}
 
 export interface UpdateBudgetPayload extends Partial<CreateBudgetPayload> {}
+
+export interface BudgetsFilter {
+  startDate?: Date
+  endDate?: Date
+}
+
+export interface BudgetsParams {
+  startDate?: string
+  endDate?: string
+}

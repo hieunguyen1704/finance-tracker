@@ -27,3 +27,18 @@ export const updateBudgetSchema = z.object({
     })
     .optional(),
 })
+
+export const budgetParamsSchema = z.object({
+  startDate: z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), {
+      message: 'Invalid date format for startDate',
+    })
+    .optional(),
+  endDate: z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), {
+      message: 'Invalid date format for endDate',
+    })
+    .optional(),
+})

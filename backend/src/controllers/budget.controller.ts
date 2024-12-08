@@ -39,7 +39,7 @@ export const getBudgetsController = async (req: Request, res: Response) => {
       return
     }
 
-    const budgets = await getBudgetsService(Number(userId))
+    const budgets = await getBudgetsService(Number(userId), req.query)
     res.status(200).json(budgets)
   } catch (error) {
     console.log('Error fetching budgets:', error)

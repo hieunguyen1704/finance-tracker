@@ -1,4 +1,8 @@
-import { CreateBudgetPayload, UpdateBudgetPayload } from '../dtos/budget.dto'
+import {
+  BudgetsParams,
+  CreateBudgetPayload,
+  UpdateBudgetPayload,
+} from '../dtos/budget.dto'
 import {
   createBudget,
   deleteBudget,
@@ -14,8 +18,28 @@ export const createBudgetService = async (data: CreateBudgetPayload) => {
   })
 }
 
-export const getBudgetsService = async (userId: number) => {
-  return await findAllBudgets(userId)
+export const getBudgetsService = async (
+  userId: number,
+  filters: BudgetsParams,
+) => {
+  const budgets = await findAllBudgets(userId, {
+    startDate: filters?.startDate ? new Date(filters.startDate) : undefined,
+    endDate: filters?.endDate ? new Date(filters.endDate) : undefined,
+  })
+
+  // Calculate total usage for each budget
+  return budgets.map((budget) => {
+    const totalUsage = budget.budgetUsages.reduce(
+      (sum, usage) => sum + usage.spent,
+      0,
+    )
+
+    const { budgetUsages: _, ...rest } = budget
+    return {
+      ...rest,
+      totalUsage,
+    }
+  })
 }
 
 export const deleteBudgetService = async (budgetId: number, userId: number) => {
