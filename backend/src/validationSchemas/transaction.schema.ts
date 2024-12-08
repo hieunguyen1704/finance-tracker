@@ -37,3 +37,15 @@ export const transactionsMetricSchema = z.object({
     })
     .optional(),
 })
+
+export const updateTransactionSchema = z.object({
+  categoryId: z.number().positive().optional(),
+  amount: z.number().positive().optional(),
+  description: z.string().optional(),
+  trackedTime: z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), {
+      message: 'Invalid date format for trackedTime',
+    })
+    .optional(),
+})

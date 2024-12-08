@@ -1,5 +1,6 @@
 import prisma from '../config/database'
 import { CreateBudgetInput, UpdateBudgetInput } from '../dtos/budget.dto'
+import { Transaction } from '@prisma/client'
 
 export const createBudget = async (data: CreateBudgetInput) => {
   return prisma.budget.create({
@@ -37,5 +38,16 @@ export const updateBudget = async (
 export const deleteBudget = async (userId: number, budgetId: number) => {
   return prisma.budget.deleteMany({
     where: { id: budgetId, userId },
+  })
+}
+
+export const findBudgetsForTransaction = async (transaction: Transaction) => {
+  return await prisma.budget.findMany({
+    where: {
+      userId: transaction.userId,
+      categoryId: transaction.categoryId,
+      startDate: { lte: transaction.trackedTime },
+      endDate: { gte: transaction.trackedTime },
+    },
   })
 }

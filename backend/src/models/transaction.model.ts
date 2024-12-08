@@ -14,6 +14,9 @@ import {
 export const createTransaction = async (data: CreateTransactionInput) => {
   const transaction = await prisma.transaction.create({
     data,
+    include: {
+      category: true,
+    },
   })
 
   return transaction
@@ -71,6 +74,9 @@ export const updateTransaction = async (params: UpdateTransactionInput) => {
       userId, // Ensure the transaction belongs to the user
     },
     data: updateData,
+    include: {
+      category: true,
+    },
   })
 }
 
@@ -157,4 +163,13 @@ export const findSpendingByDate = async (
   })
 
   return transactions
+}
+
+export const findTransactionById = async (id: number) => {
+  return await prisma.transaction.findUnique({
+    where: { id },
+    include: {
+      category: true,
+    },
+  })
 }

@@ -13,6 +13,7 @@ import {
   trackTransactionSchema,
   transactionsMetricSchema,
   transactionsParamsSchema,
+  updateTransactionSchema,
 } from '../validationSchemas/transaction.schema'
 import validateRequestQuery from '../middlewares/validationRequestQuery.middleware'
 
@@ -49,7 +50,7 @@ router.get(
 router.put(
   '/:transactionId',
   authMiddleware,
-  validateRequestBody(trackTransactionSchema),
+  validateRequestBody(updateTransactionSchema),
   updateTransactionController,
 )
 router.delete('/:transactionId', authMiddleware, deleteTransactionController)

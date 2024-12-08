@@ -3,6 +3,7 @@ import amqplib from 'amqplib'
 import { RABBITMQ_URL } from './config/dotenv'
 import { processSendConfirmationEmail } from './handlers/sendEmailConfirmation.handler'
 import queueNames from './constants/queue'
+import { processBudgetUsageUpdates } from './handlers/updateBudgetUsage.handler'
 
 const startWorker = async () => {
   const connection = await amqplib.connect(RABBITMQ_URL)
@@ -12,6 +13,10 @@ const startWorker = async () => {
     {
       name: queueNames.sendConfirmationEmail,
       handler: processSendConfirmationEmail,
+    },
+    {
+      name: queueNames.budgetUsageUpdate,
+      handler: processBudgetUsageUpdates,
     },
   ]
 

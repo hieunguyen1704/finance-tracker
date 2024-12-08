@@ -1,3 +1,4 @@
+import queueNames from '../constants/queue'
 import {
   CreateTransactionPayload,
   MetricsRequest,
@@ -10,18 +11,27 @@ import {
   findAllTransactions,
   findAllTransactionsByDate,
   findSpendingByDate,
+  findTransactionById,
   getTransactions,
   updateTransaction,
 } from '../models/transaction.model'
+import { publishToQueue } from './shared/queueService'
 
 export const trackTransactionService = async (
   data: CreateTransactionPayload,
 ) => {
-  const result = await createTransaction({
+  const transaction = await createTransaction({
     ...data,
     trackedTime: new Date(data.trackedTime),
   })
-  return result
+  if (transaction.category.type === 'expense' && transaction.categoryId) {
+    const { category: _, ...transactionMessage } = transaction
+    await publishToQueue(queueNames.budgetUsageUpdate, {
+      action: 'create',
+      transaction: transactionMessage,
+    })
+  }
+  return transaction
 }
 
 export const listTransactions = async (params: TransactionQueryParams) => {
@@ -66,20 +76,67 @@ export const listTransactions = async (params: TransactionQueryParams) => {
 export const updateTransactionService = async (
   payload: UpdateTransactionPayload,
 ) => {
-  const result = await updateTransaction({
+  const oldTransaction = await findTransactionById(payload.transactionId)
+  if (!oldTransaction) {
+    throw new Error('Transaction not found')
+  }
+  const updatedTransaction = await updateTransaction({
     ...payload,
     trackedTime: payload.trackedTime
       ? new Date(payload.trackedTime)
       : undefined,
   })
-  return result
+
+  const { category: _, ...oldTransactionMessage } = oldTransaction
+  const { category: __, ...newTransactionMessage } = updatedTransaction
+  if (
+    oldTransaction.category.type === 'expense' &&
+    updatedTransaction.category.type === 'expense'
+  ) {
+    // Case 1: Expense remains expense -> Update
+    await publishToQueue(queueNames.budgetUsageUpdate, {
+      action: 'update',
+      oldTransaction: oldTransactionMessage,
+      newTransaction: newTransactionMessage,
+    })
+  } else if (
+    oldTransaction.category.type === 'expense' &&
+    updatedTransaction.category.type === 'income'
+  ) {
+    // Case 2: Expense -> Income -> Delete BudgetUsage
+    await publishToQueue(queueNames.budgetUsageUpdate, {
+      action: 'delete',
+      transaction: oldTransactionMessage,
+    })
+  } else if (
+    oldTransaction.category.type === 'income' &&
+    updatedTransaction.category.type === 'expense'
+  ) {
+    // Case 3: Income -> Expense -> Create BudgetUsage
+    await publishToQueue(queueNames.budgetUsageUpdate, {
+      action: 'create',
+      transaction: newTransactionMessage,
+    })
+  }
+  return updatedTransaction
 }
 
 export const deleteTransactionService = async (
   transactionId: number,
   userId: number,
 ) => {
+  const deletedTransaction = await findTransactionById(transactionId)
+  if (!deletedTransaction) {
+    throw new Error('Transaction not found')
+  }
   const result = await deleteTransaction(transactionId, userId)
+  const { category: _, ...deletedTransactionMessage } = deletedTransaction
+  if (deletedTransaction.category.type === 'expense') {
+    await publishToQueue(queueNames.budgetUsageUpdate, {
+      action: 'delete',
+      transaction: deletedTransactionMessage,
+    })
+  }
   return result
 }
 
