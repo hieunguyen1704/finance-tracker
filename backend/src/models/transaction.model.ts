@@ -12,16 +12,8 @@ import {
  * @returns The created transaction object
  */
 export const createTransaction = async (data: CreateTransactionInput) => {
-  const { userId, categoryId, amount, description, trackedTime } = data
-
   const transaction = await prisma.transaction.create({
-    data: {
-      userId,
-      categoryId,
-      amount,
-      description,
-      trackedTime,
-    },
+    data,
   })
 
   return transaction

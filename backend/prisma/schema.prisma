@@ -12,7 +12,7 @@ model User {
   name          String
   email         String         @unique
   password      String // Hashed password
-  confirmed     Boolean  @default(false)
+  confirmed     Boolean        @default(false)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   transactions  Transaction[]
@@ -32,16 +32,17 @@ model MagicLink {
 }
 
 model Transaction {
-  id          Int      @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   userId      Int
   categoryId  Int
   amount      Float
   description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user     User     @relation(fields: [userId], references: [id])
-  category Category @relation(fields: [categoryId], references: [id])
-  trackedTime DateTime @default(now())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  user        User          @relation(fields: [userId], references: [id])
+  category    Category      @relation(fields: [categoryId], references: [id])
+  trackedTime DateTime      @default(now())
+  BudgetUsage BudgetUsage[]
 }
 
 model Category {
@@ -71,13 +72,15 @@ model Budget {
 }
 
 model BudgetUsage {
-  id        Int      @id @default(autoincrement())
-  budgetId  Int
-  spent     Float    @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  budgetId      Int
+  transactionId Int
+  spent         Float    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  budget Budget @relation(fields: [budgetId], references: [id])
+  budget      Budget      @relation(fields: [budgetId], references: [id])
+  transaction Transaction @relation(fields: [transactionId], references: [id])
 }
 
 model Notification {

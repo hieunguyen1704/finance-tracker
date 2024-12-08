@@ -9,6 +9,7 @@ const validateRequestBody = (schema: any) => {
       schema.parse(req.body)
       next()
     } catch (error) {
+      console.log('error when validating request body', error)
       // If validation fails, return a 404 error with the validation error details
       if (error instanceof z.ZodError) {
         errorResponse(res, 404, 'Invalid request body', error.errors)

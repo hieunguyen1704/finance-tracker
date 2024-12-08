@@ -27,13 +27,13 @@ export const transactionsMetricSchema = z.object({
   startDate: z
     .string()
     .refine((val) => !isNaN(Date.parse(val)), {
-      message: 'Invalid date format for trackedTime',
+      message: 'Invalid date format for startDate',
     })
     .optional(),
   endDate: z
     .string()
     .refine((val) => !isNaN(Date.parse(val)), {
-      message: 'Invalid date format for trackedTime',
+      message: 'Invalid date format for endDate',
     })
     .optional(),
 })
