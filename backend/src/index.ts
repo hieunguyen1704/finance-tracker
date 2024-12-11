@@ -1,3 +1,4 @@
+import cors from 'cors'
 import express from 'express'
 import authRoutes from './routes/auth.routes'
 import categoryRoutes from './routes/category.routes'
@@ -5,6 +6,14 @@ import transactionRoutes from './routes/transaction.routes'
 import budgetRoutes from './routes/budget.route'
 
 const app = express()
+
+app.use(
+  cors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: '*',
+  }),
+)
 
 app.use(express.json())
 

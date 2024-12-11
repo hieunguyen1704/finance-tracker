@@ -15,6 +15,7 @@ export const findUserByEmail = async (email: string) => {
       createdAt: true,
       updatedAt: true,
       password: true,
+      name: true,
     },
   })
 }

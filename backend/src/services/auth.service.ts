@@ -54,7 +54,7 @@ export const registerUser = async (
 export const sendConfirmationEmail = async (email: string, userId: number) => {
   const { token, expiresAt } = await generateMagicLink(userId)
 
-  const confirmationUrl = `${process.env.APP_URL}/api/auth/confirm-email?token=${token}`
+  const confirmationUrl = `${process.env.APP_URL}/confirm-email?token=${token}`
 
   await sendEmail(
     email,
@@ -98,7 +98,7 @@ export const confirmEmailWithMagicLink = async (token: string) => {
 
   const { password: _, ...safeUser } = user
 
-  return { ...safeUser, accessToken }
+  return { ...safeUser, accessToken, confirmed: true }
 }
 
 /**

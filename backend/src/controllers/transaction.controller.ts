@@ -169,7 +169,7 @@ export const getMonthlySpendingController = async (
       ...req.query,
     })
 
-    res.status(200).json({ success: true, data })
+    res.status(200).json(data)
   } catch (error) {
     console.error('Error fetching spending data:', error)
     if (error instanceof Error) {
