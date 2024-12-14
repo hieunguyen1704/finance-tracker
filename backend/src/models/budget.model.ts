@@ -32,7 +32,6 @@ export const findAllBudgets = async (
       endDate: endDate ? { lte: endDate } : {},
     }
   }
-  console.log('dateFilters', dateFilters)
 
   return await prisma.budget.findMany({
     where: {

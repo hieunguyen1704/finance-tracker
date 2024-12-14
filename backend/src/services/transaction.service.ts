@@ -1,3 +1,6 @@
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 import queueNames from '../constants/queue'
 import {
   CreateTransactionPayload,
@@ -15,7 +18,11 @@ import {
   getTransactions,
   updateTransaction,
 } from '../models/transaction.model'
+import { deleteBudgetUsage } from './budgetUsage.service'
 import { publishToQueue } from './shared/queueService'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 export const trackTransactionService = async (
   data: CreateTransactionPayload,
@@ -129,14 +136,12 @@ export const deleteTransactionService = async (
   if (!deletedTransaction) {
     throw new Error('Transaction not found')
   }
+  // Delete budget usage first
+  if (deletedTransaction.category.type === 'expense') {
+    await deleteBudgetUsage(transactionId)
+  }
   const result = await deleteTransaction(transactionId, userId)
   const { category: _, ...deletedTransactionMessage } = deletedTransaction
-  if (deletedTransaction.category.type === 'expense') {
-    await publishToQueue(queueNames.budgetUsageUpdate, {
-      action: 'delete',
-      transaction: deletedTransactionMessage,
-    })
-  }
   return result
 }
 
@@ -183,7 +188,8 @@ export const getMetrics = async ({
     }
 
     // Group by month for monthly calculations
-    const monthKey = `${trackedTime.getFullYear()}-${trackedTime.getMonth()}`
+    const utcPlus7TrackedTime = dayjs(trackedTime).tz('Asia/Bangkok')
+    const monthKey = `${utcPlus7TrackedTime.year()}-${utcPlus7TrackedTime.month()}`
     if (!monthlyData[monthKey]) {
       monthlyData[monthKey] = { income: 0, expense: 0 }
     }
@@ -232,7 +238,8 @@ export const getMonthlySpendingService = async ({
   // Post-process to group by month
   const groupedByMonth = spendingByDate.reduce(
     (acc: { [key: string]: number }, { trackedTime, _sum }) => {
-      const month = trackedTime.toISOString().slice(0, 7) // Extract "YYYY-MM" from the date
+      const utcPlus7TrackedTime = dayjs(trackedTime).tz('Asia/Bangkok')
+      const month = utcPlus7TrackedTime.format('YYYY-MM') // Extract "YYYY-MM" from the date
       if (!acc[month]) acc[month] = 0
       acc[month] += _sum.amount || 0
       return acc

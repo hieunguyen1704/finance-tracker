@@ -1,9 +1,8 @@
 import { Transaction } from '@prisma/client'
 import {
   createBudgetUsage,
-  deleteBudgetUsage,
   updateBudgetUsage,
-} from '../services/budgetUsage.serivce'
+} from '../services/budgetUsage.service'
 
 export interface UpdateBudgetUsageMessage {
   action: 'create' | 'update' | 'delete'
@@ -20,7 +19,5 @@ export const processBudgetUsageUpdates = async (
     await createBudgetUsage(transaction)
   } else if (action === 'update' && oldTransaction && newTransaction) {
     await updateBudgetUsage(oldTransaction, newTransaction)
-  } else if (action === 'delete' && transaction) {
-    await deleteBudgetUsage(transaction.id)
   }
 }

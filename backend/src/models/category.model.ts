@@ -5,6 +5,8 @@ export const getAllCategories = async () => {
     select: {
       id: true,
       name: true,
+      type: true,
+      description: true,
       createdAt: true,
       updatedAt: true,
     },
