@@ -30,6 +30,7 @@ export const findUserById = async (id: number) => {
       createdAt: true,
       updatedAt: true,
       password: true,
+      name: true,
     },
   })
 }

@@ -101,6 +101,11 @@ migrate-schema:
 	$(call generate_prisma_container)
 	$(call generate_prisma_dev)
 
+# Run Prisma migrations
+.PHONY: seed-category
+seed-category:
+	docker-compose exec app npm run prima:seed-category
+
 # Display help
 .PHONY: help
 help:
@@ -111,3 +116,4 @@ help:
 	@echo "  stop: Stop the application using Docker Compose"
 	@echo "  migrate: Run Prisma migrations"
 	@echo "  migrate-schema: Run Prisma migration with a specific name"
+	@echo "  seed-category: Seed categories"
