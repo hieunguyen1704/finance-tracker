@@ -120,11 +120,11 @@ export function BudgetForm({
           name="amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Amount</FormLabel>
+              <FormLabel>Amount (VNĐ)</FormLabel>
               <FormControl>
                 <Input
                   type="number"
-                  step="0.01"
+                  step="100"
                   placeholder="Enter budget amount"
                   {...field}
                 />

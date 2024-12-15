@@ -1,5 +1,5 @@
 # Finance tracker
-#### Video Demo: TBU
+#### Video Demo: https://youtu.be/SgKoUYk5XNo
 #### Description:
 
 Finance Tracker is a comprehensive personal finance management system that allows users to track their income, expenses, budgets.

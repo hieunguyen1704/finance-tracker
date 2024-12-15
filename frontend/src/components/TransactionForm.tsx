@@ -97,11 +97,11 @@ export function TransactionForm({
           name="amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Amount</FormLabel>
+              <FormLabel>Amount (VNĐ)</FormLabel>
               <FormControl>
                 <Input
                   type="number"
-                  step="0.01"
+                  step="100"
                   placeholder="Enter amount"
                   {...field}
                 />
